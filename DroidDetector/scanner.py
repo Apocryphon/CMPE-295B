@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 __author__ = 'yehrc'
 
 import sys
@@ -6,6 +8,7 @@ from argparse import ArgumentParser
 from androlyze import *
 from androguard.decompiler.dad import decompile
 from androguard.core.bytecodes import apk, dvm
+
 
 def main(argv):
     parser = ArgumentParser()
@@ -16,8 +19,5 @@ def main(argv):
     a, d, dx = AnalyzeAPK(apk_file, decompiler="DAD")
     show_Permissions(dx)
 
-
 if __name__ == "__main__":
     main(sys.argv[1:])
-
-    ##Daniel
