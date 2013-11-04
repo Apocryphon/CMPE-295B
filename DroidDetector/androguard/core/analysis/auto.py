@@ -60,7 +60,7 @@ class AndroAuto(object):
       debug("Running worker-%d" % idx)
 
       while True:
-        a, d, dx = None, None, None
+        a, d, dx, axmlobj, arscobj = None, None, None, None, None
         try:
           filename, fileraw = q.get()
           id_file = zlib.adler32(fileraw)
@@ -79,7 +79,15 @@ class AndroAuto(object):
               a = myandro.create_apk(log, fileraw)
               is_analysis_dex = myandro.analysis_apk(log, a)
               fileraw = a.get_dex()
-              filter_file_type = "DEX"
+              filter_file_type = androconf.is_android_raw(fileraw)
+
+            elif filter_file_type == "AXML":
+              axmlobj = myandro.create_axml(log, fileraw)
+              myandro.analysis_axml(log, axmlobj)
+
+            elif filter_file_type == "ARSC":
+              arscobj = myandro.create_arsc(log, fileraw)
+              myandro.analysis_arsc(log, arscobj)
 
             if is_analysis_dex and filter_file_type == "DEX":
               d = myandro.create_dex(log, fileraw)
@@ -96,12 +104,12 @@ class AndroAuto(object):
             myandro.analysis_app(log, a, d, dx)
 
           myandro.finish(log)
-          del a, d, dx
-          q.task_done()
         except Exception, why:
           myandro.crash(log, why)
           myandro.finish(log)
-          q.task_done()
+
+        del a, d, dx, axmlobj, arscobj
+        q.task_done()
 
     q = Queue.Queue(self.settings["max_fetcher"])
     for i in range(self.settings["max_fetcher"]):
@@ -146,13 +154,35 @@ class DefaultAndroAnalysis(object):
       continue the analysis and the file type
     """
     file_type = androconf.is_android_raw(fileraw)
-    if file_type == "APK" or file_type == "DEX" or file_type == "DEY":
+    if file_type == "APK" or file_type == "DEX" or file_type == "DEY" or file_type == "AXML" or file_type == "ARSC":
       if file_type == "APK":
         if androconf.is_valid_android_raw(fileraw):
           return (True, "APK")
       else:
         return (True, file_type)
     return (False, None)
+
+  def create_axml(self, log, fileraw):
+    """
+      This method is called in order to create a new AXML object
+
+      :param log: an object which corresponds to a unique app
+      :param fileraw: the raw axml (a string)
+
+      :rtype: an :class:`APK` object
+    """
+    return apk.AXMLPrinter(fileraw)
+
+  def create_arsc(self, log, fileraw):
+    """
+      This method is called in order to create a new ARSC object
+
+      :param log: an object which corresponds to a unique app
+      :param fileraw: the raw arsc (a string)
+
+      :rtype: an :class:`APK` object
+    """
+    return apk.ARSCParser(fileraw)
 
   def create_apk(self, log, fileraw):
     """
@@ -197,6 +227,28 @@ class DefaultAndroAnalysis(object):
       :rytpe: a :class:`VMAnalysis` object
     """
     return analysis.uVMAnalysis(dexobj)
+
+  def analysis_axml(self, log, axmlobj):
+    """
+      This method is called in order to know if the analysis must continue
+
+      :param log: an object which corresponds to a unique app
+      :param axmlobj: a :class:`AXMLPrinter` object
+
+      :rtype: a boolean
+    """
+    return True
+
+  def analysis_arsc(self, log, arscobj):
+    """
+      This method is called in order to know if the analysis must continue
+
+      :param log: an object which corresponds to a unique app
+      :param arscobj: a :class:`ARSCParser` object
+
+      :rtype: a boolean
+    """
+    return True
 
   def analysis_apk(self, log, apkobj):
     """
@@ -294,7 +346,6 @@ class DirectoryAndroAnalysis(DefaultAndroAnalysis):
   """
   def __init__(self, directory):
     self.directory = directory
-    self.collect = []
 
   def fetcher(self, q):
     for root, dirs, files in os.walk(self.directory, followlinks=True):
@@ -306,10 +357,3 @@ class DirectoryAndroAnalysis(DefaultAndroAnalysis):
           real_filename += f
           q.put((real_filename, open(real_filename, "rb").read()))
     return False
-
-  def analysis_app(self, log, apkobj, dexobj, adexobj):
-    self.collect.append([apkobj, dexobj, adexobj])
-
-  def dump(self):
-    for i in self.collect:
-      print i
