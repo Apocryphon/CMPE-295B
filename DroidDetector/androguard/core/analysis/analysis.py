@@ -1380,6 +1380,34 @@ def show_Path(vm, path) :
                                     src_descriptor,
                                     path.get_idx() )
 
+
+def show_Path2(vm, path) :
+  cm = vm.get_class_manager()
+
+  # <class_name> <descriptor> <method_name> is the format that needs to be followed
+  # need to convert the text from bytecode format to Java to match permissions map
+  # do NOT need to worry about flags, because permissions map doesn't have them
+
+  if isinstance(path, PathVar) :
+    dst_class_name, dst_method_name, dst_descriptor =  path.get_dst( cm )
+   # info_var = path.get_var_info()
+    print "%s->%s%s" % (dst_class_name,
+                                          dst_method_name,
+                                          dst_descriptor)
+  else :
+    if path.get_access_flag() == TAINTED_PACKAGE_CALL :
+     # src_class_name, src_method_name, src_descriptor =  path.get_src( cm )
+      dst_class_name, dst_method_name, dst_descriptor =  path.get_dst( cm )
+
+      print "%s->%s%s" % (dst_class_name,
+                                                  dst_method_name,
+                                                  dst_descriptor)
+    else :
+      src_class_name, src_method_name, src_descriptor =  path.get_src( cm )
+      print "%s->%s%s" % (src_class_name,
+                                    src_method_name,
+                                    src_descriptor)
+
 def show_Paths(vm, paths) :
     """
         Show paths of packages
@@ -1508,6 +1536,20 @@ def show_Permissions(dx) :
         print i, ":"
         for j in p[i] :
             show_Path( dx.get_vm(), j )
+
+
+def show_Permissions2(dx) :
+    """
+        Show where permissions are used in a specific application
+        :param dx : the analysis virtual machine
+        :type dx: a :class:`VMAnalysis` object
+    """
+    p = dx.get_permissions( [] )
+
+    for i in p :
+        print i, ":"
+        for j in p[i] :
+            show_Path2( dx.get_vm(), j )
 
 def show_DynCode(dx) :
     """

@@ -4,6 +4,7 @@ __author__ = 'yehrc'
 
 import sys
 import os
+from permissions_map import *
 from argparse import ArgumentParser
 from androlyze import *
 from androguard.decompiler.dad import decompile
@@ -30,9 +31,8 @@ def main(argv):
 
     alphabet_list.append("d_")
 
-    print alphabet_list
-
     methods_list = d.get_methods()
+
 
 
 

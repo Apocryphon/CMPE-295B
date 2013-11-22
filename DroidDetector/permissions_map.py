@@ -1,4 +1,4 @@
-permissions = {"android.permission.CHANGE_WIFI_STATE":
+perm_map = {"android.permission.CHANGE_WIFI_STATE":
 ['boolean reassociate()',
 'boolean startScan()',
 'void setCountryCode(java.lang.String,boolean)',
@@ -16,8 +16,8 @@ permissions = {"android.permission.CHANGE_WIFI_STATE":
 'boolean saveConfiguration()',
 'int stopUsingNetworkFeature(int,java.lang.String)',
 'android.net.wifi.WifiManager$Channel initialize(android.content.Context,android.os.Looper,android.net.wifi.WifiManager$ChannelListener)'],
-"android.permission.READ_PHONE_STATE":
 
+"android.permission.READ_PHONE_STATE":
 ['java.lang.String getSubscriberId()',
 'java.lang.String getDeviceSoftwareVersion()',
 'void listen(android.telephony.PhoneStateListener,int)',
