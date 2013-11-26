@@ -1137,6 +1137,7 @@ class PathVar :
 
   def get_dst2(self, cm) :
     method = cm.get_method_ref( self.dst_idx )
+    # format method's calling class name and descriptor with bytecode_to_java, do not need to format method name itself
     class_name, return_type, parameter_list = bytecode_to_java(method.get_class_name(), method.get_descriptor())
     return class_name, method.get_name(), return_type, parameter_list
 
@@ -1395,10 +1396,11 @@ def bytecode_to_java(bc_class_name, bc_descriptor):
     @rtype java_descriptor: string, reformatted descriptor of function call
     """
     # L<classname> 	reference 	an instance of class <classname>
-    java_class_name = bc_class_name.replace("/", ".")
+    java_class_name = bc_class_name.replace("/", ".")       # bytecode uses "/" in package paths, need to change to "."
     java_class_name = java_class_name[1:-1]     # remove leading "L" and trailing ";" from bytecode representation of class name
 
     java_descriptor = bc_descriptor.replace("/", ".")
+    # switch statement to convert return type to matching primitive type
     return_type = java_descriptor.split(")")[1]
     return_options = {'B': 'byte',
                       'C': 'char',
@@ -1414,12 +1416,12 @@ def bytecode_to_java(bc_class_name, bc_descriptor):
     if return_options.has_key(return_type):
         return_type = return_options[return_type]
     else:
-        return_type = return_type[1:-1]
+        return_type = return_type[1:-1]  # if return type is a class, remove leading "L" and trailing ";"
 
-    #print return_type
+    # use regular expression to find closing ")", this string is the descriptor's parameter list
     param_list = re.findall('.*\)', java_descriptor)[0]
-    #print param_list
 
+    #TODO: format parameter list
     return java_class_name, return_type, param_list
 
 
@@ -1430,6 +1432,7 @@ def show_Path2(vm, path) :
   # need to convert the text from bytecode format to Java to match permissions map
   # do NOT need to worry about flags, because permissions map doesn't have them
 
+  # call get_dst2/get_src2 methods to return custom formatted method information
   if isinstance(path, PathVar) :
       dst_class_name, dst_method_name, dst_return_type, dst_parameter_list =  path.get_dst2( cm )
       # info_var = path.get_var_info()
@@ -1477,6 +1480,7 @@ class PathP :
 
   def get_dst2(self, cm) :
     method = cm.get_method_ref( self.dst_idx )
+    # format method's calling class name and descriptor with bytecode_to_java, do not need to format method name itself
     class_name, return_type, parameter_list = bytecode_to_java(method.get_class_name(), method.get_descriptor())
     return class_name, method.get_name(), return_type, parameter_list
 
@@ -1486,6 +1490,7 @@ class PathP :
 
   def get_src2(self, cm) :
     method = cm.get_method_ref( self.src_idx )
+    # format method's calling class name and descriptor with bytecode_to_java, do not need to format method name itself
     class_name, return_type, parameter_list = bytecode_to_java(method.get_class_name(), method.get_descriptor())
     return class_name, method.get_name(), return_type, parameter_list
 
@@ -1597,7 +1602,7 @@ def show_Permissions2(dx) :
     for i in p :
         print i, ":"
         for j in p[i] :
-            show_Path2( dx.get_vm(), j )
+            show_Path2( dx.get_vm(), j )        # outputs method names in custom format to match permission map format
 
 def show_DynCode(dx) :
     """
