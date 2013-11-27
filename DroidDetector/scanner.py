@@ -33,12 +33,9 @@ def main(argv):
 
     methods_list = d.get_methods()
 
-
-
-
     #for method in methods_list:
     #    if method.get_name() not in alphabet_list:
-    #        #print "Name: ", method.get_name()
+    #        print "Name: ", method.get_name()
 
 
 if __name__ == "__main__":
