@@ -1386,6 +1386,33 @@ def show_Path(vm, path) :
                                     src_descriptor,
                                     path.get_idx() )
 
+def convert_bytecode_types(bc_type):
+    """
+
+    @rtype java_type: string representation of bytecode type
+    """
+    # switch statement to convert symbol of primitive type to actual type name
+    primitive_types = {'B': 'byte',
+                      'C': 'char',
+                      'D': 'double',
+                      'F': 'float',
+                      'I': 'int',
+                      'J': 'long',
+                      'S': 'short',
+                      'V': 'void',
+                      'Z': 'boolean'
+    }
+
+    if primitive_types.has_key(bc_type):
+        java_type = primitive_types[bc_type]   # if type is primitive
+        return java_type
+    elif bc_type == " ":
+        return " "
+    else:
+        java_type = bc_type[1:-1]              # if type is a class, remove leading "L" and trailing ";"
+        return java_type
+
+
 
 def bytecode_to_java(bc_class_name, bc_descriptor):
 
@@ -1400,28 +1427,21 @@ def bytecode_to_java(bc_class_name, bc_descriptor):
     java_class_name = java_class_name[1:-1]     # remove leading "L" and trailing ";" from bytecode representation of class name
 
     java_descriptor = bc_descriptor.replace("/", ".")
-    # switch statement to convert return type to matching primitive type
+
     return_type = java_descriptor.split(")")[1]
-    return_options = {'B': 'byte',
-                      'C': 'char',
-                      'D': 'double',
-                      'F': 'float',
-                      'I': 'int',
-                      'J': 'long',
-                      'S': 'short',
-                      'V': 'void',
-                      'Z': 'boolean'
-    }
+    return_type = convert_bytecode_types(return_type)
 
-    if return_options.has_key(return_type):
-        return_type = return_options[return_type]
-    else:
-        return_type = return_type[1:-1]  # if return type is a class, remove leading "L" and trailing ";"
-
-    # use regular expression to find closing ")", this string is the descriptor's parameter list
+    # use regular expression to find closing ")", this string is the descriptor's parameter list- currently string format
     param_list = re.findall('.*\)', java_descriptor)[0]
+    param_list = param_list[1:-1]                   # remove ( ) from parameter list
 
-    #TODO: format parameter list
+    #parameter lists are delimited by spaces. Types are either primitives or classes.
+    param_list = param_list.split(' ')              # turn parameter list into an actual list (was a string)
+    for index, param in enumerate(param_list):       # use enumerate to iterate through the parameter list
+        param_list[index] = convert_bytecode_types(param)
+    param_list = ','.join(param_list)               # convert list back into string, separated by commas (no whitespace)
+    param_list = '(%s)' % param_list                # enclose with parentheses
+
     return java_class_name, return_type, param_list
 
 
@@ -1906,7 +1926,29 @@ class TaintedPackages :
                                 permissions.append( DVM_PERMISSIONS_BY_ELEMENT[ data ] )
         return permissions
 
+    def get_all_methods(self):
+        classes = self.__vm.get_classes_names()
+        # L<classname> 	reference 	an instance of class <classname>
+        for index, class_name in enumerate(classes):
+            class_name = class_name.replace("/", ".")       # bytecode uses "/" in package paths, need to change to "."
+            class_name = class_name[1:-1]             # remove leading "L" and trailing ";" from bytecode representation of class name
+            classes[index] = class_name
+
+        for m, _ in self.get_packages() :
+            paths = m.get_methods()
+            for j in paths :
+                src_class_name, src_method_name, src_return_type, src_parameter_list = j.get_src2( self.__vm.get_class_manager() )
+                dst_class_name, dst_method_name, dst_return_type, dst_parameter_list = j.get_dst2( self.__vm.get_class_manager() )
+
+                if src_class_name in classes and m.get_name() not in classes:
+                    m_name = m.get_name().replace("/", ".")[1:-1]
+                    if j.get_access_flag() == TAINTED_PACKAGE_CALL :
+                        data = "%s: %s %s%s" % (m_name, dst_return_type, dst_method_name, dst_parameter_list)
+                        print "data is: ", data
+
+
     def get_permissions(self, permissions_needed) :
+
         """
             @param permissions_needed : a list of restricted permissions to get ([] returns all permissions)
             @rtype : a dictionnary of permissions' paths
@@ -2420,7 +2462,7 @@ class VMAnalysis :
             :param permissions_needed: a list of restricted permissions to get ([] returns all permissions)
             :type permissions_needed: list
             
-            :rtype: a dictionnary of permissions paths
+            :rtype: a dictionary of permissions paths
         """
         permissions = {}
 

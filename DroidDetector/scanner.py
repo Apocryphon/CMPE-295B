@@ -37,6 +37,8 @@ def main(argv):
     #    if method.get_name() not in alphabet_list:
     #        print "Name: ", method.get_name()
 
+    dx.get_tainted_packages().get_all_methods()
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])
