@@ -4,7 +4,7 @@ __author__ = 'yehrc'
 
 import sys
 import os
-from permissions_map import *
+from permissions_map import perm_map
 from argparse import ArgumentParser
 from androlyze import *
 from androguard.decompiler.dad import decompile
@@ -37,7 +37,7 @@ def main(argv):
     #    if method.get_name() not in alphabet_list:
     #        print "Name: ", method.get_name()
 
-    dx.get_tainted_packages().get_all_methods()
+    all_methods = dx.get_tainted_packages().get_all_methods()
 
 
 if __name__ == "__main__":

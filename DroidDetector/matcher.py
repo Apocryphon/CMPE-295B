@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 __author__ = 'doiiiob'
 
 from permissions_map import *

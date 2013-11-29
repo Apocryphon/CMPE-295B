@@ -1927,6 +1927,7 @@ class TaintedPackages :
         return permissions
 
     def get_all_methods(self):
+        method_calls_list = []
         classes = self.__vm.get_classes_names()
         # L<classname> 	reference 	an instance of class <classname>
         for index, class_name in enumerate(classes):
@@ -1943,8 +1944,12 @@ class TaintedPackages :
                 if src_class_name in classes and m.get_name() not in classes:
                     m_name = m.get_name().replace("/", ".")[1:-1]
                     if j.get_access_flag() == TAINTED_PACKAGE_CALL :
-                        data = "%s: %s %s%s" % (m_name, dst_return_type, dst_method_name, dst_parameter_list)
-                        print "data is: ", data
+                        #data = "%s: %s %s%s" % (m_name, dst_return_type, dst_method_name, dst_parameter_list)
+                        ##print "data is: ", data
+                        method_signature = "%s %s%s" % (dst_return_type, dst_method_name, dst_parameter_list)
+                        method_calls_list.append(dict([(m_name, method_signature)]))
+        print method_calls_list
+
 
 
     def get_permissions(self, permissions_needed) :
