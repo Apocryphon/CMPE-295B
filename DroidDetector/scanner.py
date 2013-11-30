@@ -9,7 +9,7 @@ from argparse import ArgumentParser
 from androlyze import *
 from androguard.decompiler.dad import decompile
 from androguard.core.bytecodes import apk, dvm
-
+from matcher2 import *
 
 
 def main(argv):
@@ -38,6 +38,10 @@ def main(argv):
     #        print "Name: ", method.get_name()
 
     all_methods = dx.get_tainted_packages().get_all_methods()
+    #print all_methods
+
+    matches = compare_methods(all_methods)
+    print matches
 
 
 if __name__ == "__main__":

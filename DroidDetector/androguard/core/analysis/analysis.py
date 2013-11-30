@@ -1927,6 +1927,7 @@ class TaintedPackages :
         return permissions
 
     def get_all_methods(self):
+        raw_method_calls_list = []
         method_calls_list = []
         classes = self.__vm.get_classes_names()
         # L<classname> 	reference 	an instance of class <classname>
@@ -1947,8 +1948,19 @@ class TaintedPackages :
                         #data = "%s: %s %s%s" % (m_name, dst_return_type, dst_method_name, dst_parameter_list)
                         ##print "data is: ", data
                         method_signature = "%s %s%s" % (dst_return_type, dst_method_name, dst_parameter_list)
-                        method_calls_list.append(dict([(m_name, method_signature)]))
-        print method_calls_list
+                        raw_method_calls_list.append(dict([(m_name, method_signature)]))
+
+                        # preemptively filter out API calls that have caller objects that are not in the class of objects in the permissions_map
+                        # if the caller object has "android", "google.common.io", "java.net", or "apache" in the package name
+                        if re.search(".*android.*", m_name) or re.search(".*google.common.io.*", m_name) or re.search(".*java.net.*", m_name) or re.search(".*org.apache.*", m_name):
+                            #TODO: find way to hash dictionaries, turn method_calls_list into a dictionary instead for O(1) lookup
+                            if dict([(m_name, method_signature)]) not in method_calls_list:
+                                method_calls_list.append(dict([(m_name, method_signature)]))
+
+
+        print "Unfiltered: ", raw_method_calls_list
+        print "Filtered: ", method_calls_list
+        return method_calls_list
 
 
 
