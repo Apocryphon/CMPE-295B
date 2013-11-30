@@ -2,7 +2,7 @@
 
 __author__ = 'doiiiob'
 
-from permissions_map import *
+from old_permissions_map import *
 from scanner import *
 from TestPermMap import *
 import copy

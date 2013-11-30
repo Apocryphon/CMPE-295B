@@ -1,4 +1,4 @@
-from permissions_map import *
+from old_permissions_map import *
 #Only for small testing purpose, will dele later
 
 #{"com.android.server.WifiService": 'void enforceChangePermission()'}

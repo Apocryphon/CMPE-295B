@@ -4,12 +4,12 @@ __author__ = 'yehrc'
 
 import sys
 import os
-from permissions_map import perm_map
+from old_permissions_map import perm_map
 from argparse import ArgumentParser
 from androlyze import *
 from androguard.decompiler.dad import decompile
 from androguard.core.bytecodes import apk, dvm
-from matcher2 import *
+from mapper import *
 
 
 def main(argv):
@@ -40,8 +40,9 @@ def main(argv):
     all_methods = dx.get_tainted_packages().get_all_methods()
     #print all_methods
 
-    matches = compare_methods(all_methods)
-    print matches
+    api_calls, bad_calls = compare_methods(all_methods, perms_list)
+    print "All of the Android API calls needing permissions: ", api_calls
+    print "The following are bad calls: ", bad_calls
 
 
 if __name__ == "__main__":
