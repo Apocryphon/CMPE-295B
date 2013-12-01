@@ -24,12 +24,12 @@ def main(argv):
     perms_list.sort()
     print "Permissions requested by app are: ", perms_list
 
-    alphabet_string = string.ascii_letters
-    alphabet_list = []
-    for letter in alphabet_string:
-        alphabet_list.append(letter)
-
-    alphabet_list.append("d_")
+    #alphabet_string = string.ascii_letters
+    #alphabet_list = []
+    #for letter in alphabet_string:
+    #    alphabet_list.append(letter)
+    #
+    #alphabet_list.append("d_")
 
     methods_list = d.get_methods()
 
@@ -41,6 +41,7 @@ def main(argv):
     #print all_methods
 
     api_calls, bad_calls = compare_methods(all_methods, perms_list)
+    print "Android API calls requiring privileges: %s", len(api_calls)
     print "All of the Android API calls needing permissions: ", api_calls
     print "The following are bad calls: ", bad_calls
 
