@@ -4,6 +4,7 @@ __author__ = 'yehrc'
 
 import sys
 import os
+import csv
 from old_permissions_map import perm_map
 from argparse import ArgumentParser
 from androlyze import *
@@ -41,9 +42,25 @@ def main(argv):
     #print all_methods
 
     api_calls, bad_calls = compare_methods(all_methods, perms_list)
-    print "Android API calls requiring privileges: %s", len(api_calls)
+    print "Android API calls requiring privileges: ", len(api_calls)
     print "All of the Android API calls needing permissions: ", api_calls
     print "The following are bad calls: ", bad_calls
+
+    create_csv(len(all_methods), len(api_calls), len(bad_calls))
+
+def create_csv(total_method_calls, total_api_calls, bad_api_calls):
+    non_api_calls = total_method_calls - total_api_calls
+    good_api_calls = total_api_calls - bad_api_calls
+
+    stats_csv  = open('../HomeOne/extendbootstrap-master/stats.csv', "wb")
+    writer = csv.writer(stats_csv)
+    writer.writerow(["method_type", "calls"])
+    writer.writerow(["Non-Android API Calls", non_api_calls])
+    writer.writerow(["Permission Declared Calls", good_api_calls])
+    writer.writerow(["No Permission Calls", bad_api_calls])
+
+    stats_csv.close()
+
 
 
 if __name__ == "__main__":

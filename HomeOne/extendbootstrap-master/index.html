@@ -398,6 +398,14 @@
 <div class="double-border"></div>
 -->
 
+
+<div id = "divGraph1">
+</div>
+<!-- <div id ="divTable"> 
+</div>-->
+<div id = "divGraph2">
+</div>
+
 <div class="row-fluid">
   <div class="span6">
     <div class="box-wrap">
@@ -524,10 +532,285 @@
 <script src="js/bootbox.js"></script>
 <script src="js/bootstro.min.js"></script>
 
-
+<script src="http://d3js.org/d3.v3.min.js"></script>
 
 
 <script type="text/javascript">
+
+var lColor = d3.scale.category20();
+	
+var lWidth =950;
+var lHeight = 500;
+
+var lDataSize = 0;
+
+// Auto refresh list if sign in for every 10 seconds
+var intVar = setInterval(
+	function() 
+	{
+	//	redraw();
+	}, 10000);
+
+redraw();
+
+/**
+* Redraw the graph
+*
+**/			  
+function redraw()
+{
+	// Load csv file
+	d3.csv("stats.csv", 
+		function(pError, pCSVData)
+		{
+			// lDataSize = pCSVData.length;
+			// Activate draw for the first time
+			drawGraph(pCSVData);
+			// drawTable(pCSVData);
+		});  // d3.csv("data.csv", function(pError, pCSVData)
+}  // function redraw()
+
+/**
+* Draw the graph based on newest csv file
+* Input: pCSVData Data object
+**/			  
+function drawGraph(pCSVData)
+{
+    // Remove old graph
+	d3.select("#divGraph1").select("svg").remove();
+	
+	// Calculate radius
+	var lRaidus = Math.min(lWidth, lHeight) / 2;
+
+	// Calculate space between arcs
+	var lArc = d3.svg.arc().outerRadius(lRaidus - 10).innerRadius(0);
+	
+	var lPie = d3.layout.pie().sort(null).value(
+			function(pData) 
+			{
+				return pData.calls;
+			});
+
+	var lSVG = d3.select("#divGraph1").append("svg").attr("width", lWidth).attr("height", lHeight).append("g").attr("transform", "translate(" + lWidth/2 + "," + lHeight/2 + ")");
+
+
+			lCSVData = pCSVData;
+			pCSVData.forEach(
+				function(pDataRow)
+				{
+					// pDataRow.population = +pDataRow.population;
+					pDataRow.calls = +pDataRow.calls;
+				}  // funciton(pDataSet)
+			);
+			
+			var lG = lSVG.selectAll(".arc").data(lPie(pCSVData)).enter().append("g").attr("class", "arc");
+			
+			lG.append("path").attr("d", lArc)
+				.style("fill", 
+					function(pData, pIndex)
+					{
+						if (pIndex == 0)
+							return "#48CA3B";
+						else if (pIndex == 1)
+							return "#DEBB27";
+						else if (pIndex == 2)
+							return "#AD1D28";
+					});  // .style("fill", function(pDataSet))
+	
+			lG.append("text")
+				.attr("transform",
+					function(pData)
+					{
+						return "translate(" + lArc.centroid(pData) + ")";
+					}  // function(pData)
+				)  // .attr("transform", function(pData))
+				.attr("dy", ".35em")
+				.style("text-anchor", "middle")
+				.text(
+					function(pData)
+					{ 
+						return pData.data.method_type;
+					});  // .text(function(pData))
+
+
+				    // Remove old graph
+					d3.select("#divGraph2").select("svg").remove();
+
+					// Calculate radius
+					var lRaidus = Math.min(lWidth, lHeight) / 2;
+
+					// Calculate space between arcs
+					var lArc = d3.svg.arc().outerRadius(lRaidus - 10).innerRadius(0);
+
+					var lPie = d3.layout.pie().sort(null).value(
+							function(pData) 
+							{
+								return pData.calls;
+							});
+
+					var lSVG = d3.select("#divGraph2").append("svg").attr("width", lWidth).attr("height", lHeight).append("g").attr("transform", "translate(" + lWidth/2 + "," + lHeight/2 + ")");
+
+
+							pCSVData.splice(0, 1);			// remove first row from array for Non-Android API calls
+							lCSVData = pCSVData;
+							pCSVData.forEach(
+								function(pDataRow)
+								{
+									// pDataRow.population = +pDataRow.population;
+									pDataRow.calls = +pDataRow.calls;
+								}  // funciton(pDataSet)
+							);
+
+							var lG = lSVG.selectAll(".arc").data(lPie(pCSVData)).enter().append("g").attr("class", "arc");
+
+							lG.append("path").attr("d", lArc)
+								.style("fill", 
+									function(pData, pIndex)
+									{
+										return lColor(pIndex);
+									});  // .style("fill", function(pDataSet))
+
+							lG.append("text")
+								.attr("transform",
+									function(pData)
+									{
+										return "translate(" + lArc.centroid(pData) + ")";
+									}  // function(pData)
+								)  // .attr("transform", function(pData))
+								.attr("dy", ".35em")
+								.style("text-anchor", "middle")
+								.text(
+									function(pData)
+									{ 
+										return pData.data.method_type;
+									});  // .text(function(pData))
+
+
+}  // function drawGraph
+
+/**
+* Draw Table based on latest csv file
+* Input: pCSVData Data object
+**/
+// function drawTable(pCSVData)
+// {
+// 	// Select table
+// 	var lDivTable = d3.select("#divTable");
+// 	
+// 	// Remove old table
+// 	lDivTable.select("table").remove();
+// 	
+// 	// Create new table
+// 	var lTable = lDivTable.append("table");
+// 
+// 	var lHeaderRow = lTable.append("tr");
+// 	// Append State
+// 	lHeaderRow.append("th");
+// 	// Append State
+// 	lHeaderRow.append("th").text("State");
+// 	// Append Vote
+// 	lHeaderRow.append("th").text("Vote");
+// 	
+// 	var lIndex = 0;
+// 			pCSVData.forEach(
+// 					function(pDataRow)
+// 					{
+// 						var lCurrentRow = lTable.append("tr").attr('id', function(pData, pIndex){return 'data_' + pIndex;});
+// 						// Append State
+// 						lCurrentRow.append("td").style("background-color", lColor(lIndex));
+// 						// Append State
+// 						lCurrentRow.append("td")
+// 						.append("input")
+// 							.attr("type", "text")
+// 							.attr('value', pDataRow.state)
+// 							.attr('id', 'data_state' + lIndex);
+// 						// Append Vote
+// 						lCurrentRow.append("td")
+// 						.append("input")
+// 							.attr("type", "text")
+// 							.attr('value', pDataRow.vote)
+// 							.attr('id','data_vote' + lIndex);
+// 						// Append Remove Button
+// 						lCurrentRow.append("td").append("div").attr("onClick","removeData(" + lIndex + ");").text("-");
+// 						lIndex++;
+// 					}  // funciton(pDataSet)
+// 			);
+// 			
+// 	var lAddNewRow = lTable.append("tr");
+// 	lAddNewRow.append("td").style("background-color", lColor(lIndex));
+// 	// Append State
+// 	lAddNewRow.append("td")
+// 		.append("input")
+// 		.attr("type", "text")
+// 		.attr('id','data_state' + lIndex)
+// 		.attr('value', '');
+// 		
+// 	// Append Vote
+// 	lAddNewRow.append("td")
+// 		.append("input")
+// 		.attr("type", "text")
+// 		.attr('id','data_vote' + lIndex)
+// 		.attr('value', '');
+// 	
+// 	// Append Add Button
+// 	lAddNewRow.append("td").append("div").attr("onClick","addData();").text("+");
+// 	
+// }  // function drawTable()
+
+/**
+* Add data, an backend http request will need to present to use it
+* 
+**/
+// function addData()
+// {
+// 	var lOutput = "state,vote\n";
+// 	
+// 	var lNewState = document.getElementById("data_state" + lDataSize).value;
+// 	var lNewVote = document.getElementById("data_vote" + lDataSize).value;
+// 	
+// 	// If invalid data, do not save it
+// 	if(isNaN(lNewVote) || lNewState.trim() == '')
+// 	{
+// 	
+// 		alert("Invalid data, please check and try again");
+// 		return;
+// 	}
+// 	
+// 	for(var lIndex = 0; lIndex <= lDataSize; lIndex++)
+// 	{
+// 			
+// 		lOutput = lOutput + document.getElementById("data_state" + lIndex).value + ",";
+// 		lOutput = lOutput + document.getElementById("data_vote" + lIndex).value + "\n";
+// 	}  // for
+// 
+// 	
+// 	alert(lOutput);
+// 	alert("The current implmentation is file system, which do not allow file edit capabilities");
+// }
+
+/**
+* Remove data, an backend http request will need to present to use it
+* Input: pIndex The index to be removed
+**/
+// function removeData(pIndex)
+// {
+// 	var lOutput = "state,vote\n";
+// 
+// 	for(var lIndex = 0; lIndex < lDataSize; lIndex++)
+// 	{
+// 		if(lIndex != pIndex)
+// 		{		
+// 			lOutput = lOutput + document.getElementById("data_state" + lIndex).value + ",";
+// 			lOutput = lOutput + document.getElementById("data_vote" + lIndex).value + "\n";
+// 		}  // if
+// 	}  // for
+// 
+// 	alert(lOutput);
+// 	alert("The current implmentation is file system, which do not allow file edit capabilities");
+// }
+
+
+
       $(function() {  
         var data = [
         { label: "Green",  data: 30.7, color: "#48CA3B"},
