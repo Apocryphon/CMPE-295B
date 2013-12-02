@@ -625,7 +625,17 @@ function drawGraph(pCSVData)
 					}  // function(pData)
 				)  // .attr("transform", function(pData))
 				.attr("dy", ".35em")
-				.style("text-anchor", "middle")
+				.style("text-anchor", 	
+					function(pData, pIndex)
+					{
+						if (pIndex == 0)
+							return "middle";
+						else if (pIndex == 1)
+							return "start";
+						else if (pIndex == 2)
+							return "end";
+					}
+				)
 				.text(
 					function(pData)
 					{ 
@@ -633,57 +643,57 @@ function drawGraph(pCSVData)
 					});  // .text(function(pData))
 
 
-				    // Remove old graph
-					d3.select("#divGraph2").select("svg").remove();
+    // Remove old graph
+	d3.select("#divGraph2").select("svg").remove();
 
-					// Calculate radius
-					var lRaidus = Math.min(lWidth, lHeight) / 2;
+	// Calculate radius
+	var lRaidus = Math.min(lWidth, lHeight) / 2;
 
-					// Calculate space between arcs
-					var lArc = d3.svg.arc().outerRadius(lRaidus - 10).innerRadius(0);
+	// Calculate space between arcs
+	var lArc = d3.svg.arc().outerRadius(lRaidus - 10).innerRadius(0);
 
-					var lPie = d3.layout.pie().sort(null).value(
-							function(pData) 
-							{
-								return pData.calls;
-							});
+	var lPie = d3.layout.pie().sort(null).value(
+			function(pData) 
+			{
+				return pData.calls;
+			});
 
-					var lSVG = d3.select("#divGraph2").append("svg").attr("width", lWidth).attr("height", lHeight).append("g").attr("transform", "translate(" + lWidth/2 + "," + lHeight/2 + ")");
+	var lSVG = d3.select("#divGraph2").append("svg").attr("width", lWidth).attr("height", lHeight).append("g").attr("transform", "translate(" + lWidth/2 + "," + lHeight/2 + ")");
 
 
-							pCSVData.splice(0, 1);			// remove first row from array for Non-Android API calls
-							lCSVData = pCSVData;
-							pCSVData.forEach(
-								function(pDataRow)
-								{
-									// pDataRow.population = +pDataRow.population;
-									pDataRow.calls = +pDataRow.calls;
-								}  // funciton(pDataSet)
-							);
+			pCSVData.splice(0, 1);			// remove first row from array for Non-Android API calls
+			lCSVData = pCSVData;
+			pCSVData.forEach(
+				function(pDataRow)
+				{
+					// pDataRow.population = +pDataRow.population;
+					pDataRow.calls = +pDataRow.calls;
+				}  // funciton(pDataSet)
+			);
 
-							var lG = lSVG.selectAll(".arc").data(lPie(pCSVData)).enter().append("g").attr("class", "arc");
+			var lG = lSVG.selectAll(".arc").data(lPie(pCSVData)).enter().append("g").attr("class", "arc");
 
-							lG.append("path").attr("d", lArc)
-								.style("fill", 
-									function(pData, pIndex)
-									{
-										return lColor(pIndex);
-									});  // .style("fill", function(pDataSet))
+			lG.append("path").attr("d", lArc)
+				.style("fill", 
+					function(pData, pIndex)
+					{
+						return lColor(pIndex);
+					});  // .style("fill", function(pDataSet))
 
-							lG.append("text")
-								.attr("transform",
-									function(pData)
-									{
-										return "translate(" + lArc.centroid(pData) + ")";
-									}  // function(pData)
-								)  // .attr("transform", function(pData))
-								.attr("dy", ".35em")
-								.style("text-anchor", "middle")
-								.text(
-									function(pData)
-									{ 
-										return pData.data.method_type;
-									});  // .text(function(pData))
+			lG.append("text")
+				.attr("transform",
+					function(pData)
+					{
+						return "translate(" + lArc.centroid(pData) + ")";
+					}  // function(pData)
+				)  // .attr("transform", function(pData))
+				.attr("dy", ".35em")
+				.style("text-anchor", "middle")
+				.text(
+					function(pData)
+					{ 
+						return pData.data.method_type;
+					});  // .text(function(pData))
 
 
 }  // function drawGraph

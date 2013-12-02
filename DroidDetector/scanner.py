@@ -42,8 +42,13 @@ def main(argv):
     #print all_methods
 
     api_calls, bad_calls = compare_methods(all_methods, perms_list)
-    print "Android API calls requiring privileges: ", len(api_calls)
+    print
     print "All of the Android API calls needing permissions: ", api_calls
+    print
+    print "Total API calls: ", len(all_methods)
+    print "Android API calls requiring privileges: ", len(api_calls)
+    print "Declared Permissions API calls: ", len(api_calls)-len(bad_calls)
+    print "Undeclared Permissions API calls: ", len(bad_calls)
     print "The following are bad calls: ", bad_calls
 
     create_csv(len(all_methods), len(api_calls), len(bad_calls))
@@ -56,8 +61,8 @@ def create_csv(total_method_calls, total_api_calls, bad_api_calls):
     writer = csv.writer(stats_csv)
     writer.writerow(["method_type", "calls"])
     writer.writerow(["Non-Android API Calls", non_api_calls])
-    writer.writerow(["Permission Declared Calls", good_api_calls])
-    writer.writerow(["No Permission Calls", bad_api_calls])
+    writer.writerow(["Declared Permissions", good_api_calls])
+    writer.writerow(["Undeclared Permissions", bad_api_calls])
 
     stats_csv.close()
 

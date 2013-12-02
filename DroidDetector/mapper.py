@@ -18,6 +18,7 @@ from permissions_map import perm_map
 
 def compare_methods(all_method_calls_list, declared_perms_list):
     print "starting time: ", datetime.datetime.now()
+    print
 
     undeclared_permissions = {}
     api_calls_list = []
@@ -45,6 +46,8 @@ def compare_methods(all_method_calls_list, declared_perms_list):
                             else:
                                 undeclared_permissions[call_perm].append(call_perm)
 
+    print
     print "ending time: ", datetime.datetime.now()
+    print
 
     return api_calls_list, undeclared_permissions
